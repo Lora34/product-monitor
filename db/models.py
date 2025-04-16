@@ -60,9 +60,9 @@ class Product(Base):
     advantages: Mapped[str] = mapped_column(String, nullable=True)
     additional: Mapped[str] = mapped_column(String, nullable=True)
     link: Mapped[str] = mapped_column(String, nullable=True)
-    #status_of_project: Mapped[ProductStatus] = mapped_column(SQLAEnum(ProductStatus, name="product_status_enum"), nullable=False)
-    born_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
-    post_date: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    status_of_project: Mapped[ProductStatus] = mapped_column(SQLAEnum(ProductStatus, name="product_status_enum"), nullable=True)
+    born_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
+    post_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
     pictures = Column(ARRAY(String), nullable=True) #Галерея - массив изображений продукта
     #audience: Mapped[int] = mapped_column(Integer, nullable=True)
 

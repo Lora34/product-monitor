@@ -1,10 +1,11 @@
+from datetime import date
 from typing import Union
 from uuid import UUID
 from enum import Enum
 from sqlalchemy import update, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import User
+from db.models import Product, User
 
 ###########################################################
 # BLOCK FOR INTERACTION WITH DATABASE IN BUSINESS CONTEXT #
@@ -27,12 +28,12 @@ class UserDAL:
         email: str, 
         hashed_password: str, 
         roles: list[PortalRole],
-        username=str,
-        current_company=str,
-        your_role=str,
-        headline=str,
-        about=str,
-        links=str
+        username: str,
+        current_company: str,
+        your_role: str,
+        headline: str,
+        about: str,
+        links: str
     ) -> User:
         new_user = User(
             name=name,
@@ -84,3 +85,47 @@ class UserDAL:
         update_user_id_row = res.fetchone()
         if update_user_id_row is not None:
             return update_user_id_row[0]
+
+class ProductDAL:
+    """Data Access Layer for operating user info"""
+    def __init__(self, db_session: AsyncSession):
+        self.db_session = db_session
+
+    async def create_product(
+        self, 
+        name: str, 
+        description: str, 
+        link_to_product: str, 
+        price: str, 
+        logo: str,
+        about: str,
+        problem: str,
+        decision: str,
+        advantages: str,
+        additional: str,
+        link: str,
+        #born_date: date,
+        #post_date: date,
+        pictures: str
+    ) -> Product:
+        new_product = Product(
+            name=name,
+            description=description, 
+            link_to_product=link_to_product,
+            price= price,
+            logo=logo,
+            about=about,
+            problem=problem,
+            decision=decision,
+            advantages=advantages,
+            additional=additional,
+            link=link,
+            #born_date=born_date,
+            #post_date=post_date,
+            pictures=pictures
+        )
+        
+        self.db_session.add(new_product)
+        await self.db_session.flush()
+        return new_product
+    

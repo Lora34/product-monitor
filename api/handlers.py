@@ -2,14 +2,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from api.actions.product import _create_new_product
 from api.actions.user import check_user_permissions
 from api.actions.auth import get_current_user_from_token
 from api.actions.user import _create_new_user, _delete_user, _get_user_by_id, _update_user
-from api.models import UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
+from api.models import ProductCreate, ShowProduct, UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
 from db.models import User
 from db.session import get_db
 
 user_router = APIRouter()
+product_router = APIRouter()
 
 
 @user_router.post("/", response_model=ShowUser)
@@ -65,3 +67,8 @@ async def update_user_by_id(
              raise HTTPException(status_code=403, detail="Forbidden.")
     updated_user_id = await _update_user(updated_user_params=updated_user_params, db=db, user_id=user_id)
     return UpdatedUserResponse(updated_user_id=updated_user_id)
+
+### Product handlers ###
+@product_router.post("/", response_model=ShowProduct)
+async def create_product(body: ProductCreate, db: AsyncSession = Depends(get_db)) -> ShowProduct:
+    return await _create_new_product(body, db)

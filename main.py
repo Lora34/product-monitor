@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.handlers import user_router
 from api.login_handler import login_router
+from api.handlers import product_router
 
 #########################
 # BLOCK WITH API ROUTES #
@@ -19,6 +20,7 @@ main_api_router = APIRouter()
 # set routes to the app instance
 main_api_router.include_router(user_router, prefix="/user", tags=["user"])
 main_api_router.include_router(login_router, prefix="/login", tags=["login"])
+main_api_router.include_router(product_router, prefix="/product", tags=["product"])
 app.include_router(main_api_router)
 
 app.add_middleware(

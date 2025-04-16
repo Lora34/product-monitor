@@ -1,3 +1,4 @@
+from datetime import date
 import re
 import uuid
 from typing import Optional
@@ -100,3 +101,36 @@ class UpdateUserRequest(BaseModel):
 class Token(BaseModel):
      access_token: str
      token_type: str
+
+class ShowProduct(TunedModel):
+    product_id: uuid.UUID
+    name: str 
+    description: str 
+    link_to_product: str 
+    price: str 
+    logo: str
+    about: str
+    problem: str
+    decision: str
+    advantages: str
+    additional: str
+    link: str
+    #born_date: date
+    #post_date: date
+    pictures: str
+
+class ProductCreate(BaseModel):
+    name: str 
+    description: str 
+    link_to_product: str 
+    price: str 
+    logo: str
+    about: str
+    problem: str
+    decision: str
+    advantages: str
+    additional: str
+    link: str
+    #born_date: date
+    #post_date: date
+    pictures: str
