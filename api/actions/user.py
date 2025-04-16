@@ -23,6 +23,12 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
             roles=[
                  PortalRole.ROLE_PORTAL_USER,
              ],
+            username=body.username,
+            current_company=body.current_company,
+            your_role=body.your_role,
+            headline=body.headline,
+            about=body.about,
+            links=body.links
         )
         return ShowUser(
             user_id=user.user_id,
@@ -30,6 +36,12 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
             surname=user.surname,
             email=user.email,
             is_active=user.is_active,
+            username=user.username,
+            current_company=user.current_company,
+            your_role=user.your_role,
+            headline=user.headline,
+            about=user.about,
+            links=user.links
         )
 
 

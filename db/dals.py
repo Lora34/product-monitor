@@ -15,14 +15,24 @@ class PortalRole(str, Enum):
      ROLE_PORTAL_ADMIN = "ROLE_PORTAL_ADMIN"
      ROLE_PORTAL_SUPERADMIN = "ROLE_PORTAL_SUPERADMIN"
 
-     
 class UserDAL:
     """Data Access Layer for operating user info"""
     def __init__(self, db_session: AsyncSession):
         self.db_session = db_session
 
     async def create_user(
-        self, name: str, surname: str, email: str, hashed_password: str, roles: list[PortalRole],
+        self, 
+        name: str, 
+        surname: str, 
+        email: str, 
+        hashed_password: str, 
+        roles: list[PortalRole],
+        username=str,
+        current_company=str,
+        your_role=str,
+        headline=str,
+        about=str,
+        links=str
     ) -> User:
         new_user = User(
             name=name,
@@ -30,6 +40,13 @@ class UserDAL:
             email=email,
             hashed_password=hashed_password,
             roles=roles,
+            username=username,
+            current_company=current_company,
+            your_role=your_role,
+            headline=headline,
+            about=about,
+            links=links
+
         )
         self.db_session.add(new_user)
         await self.db_session.flush()

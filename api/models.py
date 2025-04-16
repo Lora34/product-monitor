@@ -25,6 +25,12 @@ class ShowUser(TunedModel):
     surname: str
     email: EmailStr
     is_active: bool
+    username: str
+    current_company: str
+    your_role: str
+    headline: str
+    about: str
+    links: str
 
 
 class UserCreate(BaseModel):
@@ -32,6 +38,12 @@ class UserCreate(BaseModel):
     surname: str
     email: EmailStr
     password: str
+    username: str
+    current_company: str
+    your_role: str
+    headline: str
+    about: str
+    links: str
 
     @field_validator("name")
     def validate_name(cls, value):
@@ -62,6 +74,12 @@ class UpdateUserRequest(BaseModel):
     name: Optional[str]
     surname: Optional[str]
     email: Optional[EmailStr]
+    username: Optional[str]
+    #current_company: Optional[str]
+    #your_role: Optional[str]
+    #headline: Optional[str]
+    #about: Optional[str]
+    #links: Optional[str]
 
     @field_validator("name")
     def validate_name(cls, value):
