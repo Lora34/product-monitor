@@ -76,11 +76,11 @@ class UpdateUserRequest(BaseModel):
     surname: Optional[str]
     email: Optional[EmailStr]
     username: Optional[str]
-    #current_company: Optional[str]
-    #your_role: Optional[str]
-    #headline: Optional[str]
-    #about: Optional[str]
-    #links: Optional[str]
+    current_company: Optional[str]
+    your_role: Optional[str]
+    headline: Optional[str]
+    about: Optional[str]
+    links: Optional[str]
 
     @field_validator("name")
     def validate_name(cls, value):
@@ -102,8 +102,10 @@ class Token(BaseModel):
      access_token: str
      token_type: str
 
+### Product ###
 class ShowProduct(TunedModel):
     product_id: uuid.UUID
+    user_id: str
     name: str 
     description: str 
     link_to_product: str 
@@ -120,6 +122,7 @@ class ShowProduct(TunedModel):
     pictures: str
 
 class ProductCreate(BaseModel):
+    user_id: str
     name: str 
     description: str 
     link_to_product: str 
@@ -134,3 +137,26 @@ class ProductCreate(BaseModel):
     #born_date: date
     #post_date: date
     pictures: str
+
+class UpdatedProductResponse(BaseModel):
+    updated_product_id: uuid.UUID
+
+class UpdateProductRequest(BaseModel):
+    name: Optional[str]
+    description: Optional[str]
+    link_to_product: Optional[EmailStr]
+    logo: Optional[str]
+    about: Optional[str]
+    problem: Optional[str]
+    decision: Optional[str]
+    advantages: Optional[str]
+    additional: Optional[str]
+    link: Optional[str]
+
+    @field_validator("name")
+    def validate_name(cls, value):
+        if not LETTER_MATCH_PATTERN.match(value):
+            raise HTTPException(
+                status_code=422, detail="Name should contains only letters"
+            )
+        return value

@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 from enum import Enum
-from sqlalchemy import Date, ForeignKey
+from sqlalchemy import Date, ForeignKey, ForeignKeyConstraint, Index, PrimaryKeyConstraint, UniqueConstraint
 
 from sqlalchemy import Column, DateTime, Integer, String, Boolean
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
@@ -42,12 +42,23 @@ class User(Base):
     about: Mapped[str] = mapped_column(String, nullable=True)
     links: Mapped[str] = mapped_column(String, nullable=True)
     
+    products: Mapped[list["Product"]] = relationship(back_populates="user")
+
+    #__table_args__ = (
+    #    PrimaryKeyConstraint('id', name='user_pk'),
+    #    UniqueConstraint('username'),
+    #    UniqueConstraint('email'),
+    #)
 
 
 class Product(Base):
     __tablename__ = "products"
 
     product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.user_id"), nullable=True)
+    user: Mapped["User"] = relationship(back_populates="products")
+
     name: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     link_to_product: Mapped[str] = mapped_column(String, nullable=True)
@@ -65,6 +76,11 @@ class Product(Base):
     post_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
     pictures = Column(ARRAY(String), nullable=True) #Галерея - массив изображений продукта
     #audience: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    #__table_args__ = (
+    #    ForeignKeyConstraint(['user_id'], ['users.id']),        
+    #    Index('title_content_index' 'title', 'content'), # composite index on title and content   
+    #)
 
 
 class Category(Base):

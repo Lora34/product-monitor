@@ -93,6 +93,7 @@ class ProductDAL:
 
     async def create_product(
         self, 
+        user_id: str,
         name: str, 
         description: str, 
         link_to_product: str, 
@@ -109,6 +110,7 @@ class ProductDAL:
         pictures: str
     ) -> Product:
         new_product = Product(
+            user_id=user_id,
             name=name,
             description=description, 
             link_to_product=link_to_product,
@@ -128,4 +130,21 @@ class ProductDAL:
         self.db_session.add(new_product)
         await self.db_session.flush()
         return new_product
+    
+    async def get_product_by_id(self, product_id: UUID) -> Union[Product, None]:
+        query = select(Product).where(Product.product_id == product_id)
+        res = await self.db_session.execute(query)
+        product_row = res.fetchone()
+        if product_row is not None:
+            return product_row[0]
+    
+    async def update_product(self, product_id: UUID, **kwargs) -> Union[UUID, None]:
+        query = update(Product). \
+            where(and_(Product.product_id == product_id, Product.is_active == True)). \
+            values(kwargs). \
+            returning(Product.product_id)
+        res = await self.db_session.execute(query)
+        update_product_id_row = res.fetchone()
+        if update_product_id_row is not None:
+            return update_product_id_row[0]
     

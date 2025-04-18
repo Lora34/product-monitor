@@ -2,11 +2,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.actions.product import _create_new_product
+from api.actions.product import _create_new_product, _get_product_by_id, _update_product
 from api.actions.user import check_user_permissions
 from api.actions.auth import get_current_user_from_token
 from api.actions.user import _create_new_user, _delete_user, _get_user_by_id, _update_user
-from api.models import ProductCreate, ShowProduct, UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
+from api.models import ProductCreate, ShowProduct, UpdateProductRequest, UpdatedProductResponse, UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
 from db.models import User
 from db.session import get_db
 
@@ -72,3 +72,24 @@ async def update_user_by_id(
 @product_router.post("/", response_model=ShowProduct)
 async def create_product(body: ProductCreate, db: AsyncSession = Depends(get_db)) -> ShowProduct:
     return await _create_new_product(body, db)
+
+@product_router.patch("/", response_model=UpdatedProductResponse)
+async def update_product_by_id(
+        product_id: UUID, 
+        user_id: UUID,
+        body: UpdateProductRequest, 
+        db: AsyncSession = Depends(get_db),
+        current_user: User = Depends(get_current_user_from_token)
+) -> UpdatedProductResponse:
+    updated_product_params = body.model_dump(exclude_none=True)
+    if updated_product_params == {}:
+        raise HTTPException(status_code=422, detail="At least one parameter for product update info should be provided")
+    product_for_update = await _get_product_by_id(product_id, db)
+    if product_for_update is None:
+        raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found.")
+
+    if user_id != current_user.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden.")
+         
+    updated_product_id = await _update_product(updated_product_params=updated_product_params, db=db, product_id=product_id)
+    return UpdatedProductResponse(updated_product_id=updated_product_id)

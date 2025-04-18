@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 
 from api.models import ProductCreate, ShowProduct
 from db.dals import ProductDAL
-from db.models import User
+from db.models import Product, User
 from db.session import get_db
 from hashing import Hasher
 
@@ -16,6 +16,7 @@ async def _create_new_product(body: ProductCreate, session) -> ShowProduct:
     async with session.begin():
         product_dal = ProductDAL(session)
         product = await product_dal.create_product(
+            user_id=body.user_id,
             name=body.name,
             description=body.description,
             link_to_product=body.link_to_product,
@@ -32,6 +33,7 @@ async def _create_new_product(body: ProductCreate, session) -> ShowProduct:
             pictures=body.pictures
         )
         return ShowProduct(
+            user_id=product.user_id,
             product_id=product.product_id,
             name=product.name,
             description=product.description,
@@ -48,3 +50,21 @@ async def _create_new_product(body: ProductCreate, session) -> ShowProduct:
             #post_date=product.post_date,
             pictures=product.pictures
         )
+
+async def _get_product_by_id(product_id, session) -> Union[Product, None]:
+    async with session.begin():
+        product_dal = ProductDAL(session)
+        product = await product_dal.get_product_by_id(
+            product_id=product_id,
+        )
+        if product is not None:
+            return product
+
+async def _update_product(updated_product_params: dict, product_id: UUID, session) -> Union[UUID, None]:
+    async with session.begin():
+        product_dal = ProductDAL(session)
+        updated_product_id = await product_dal.update_product(
+            product_id=product_id,
+            **updated_product_params
+        )
+        return updated_product_id
