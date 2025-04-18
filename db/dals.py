@@ -140,7 +140,7 @@ class ProductDAL:
     
     async def update_product(self, product_id: UUID, **kwargs) -> Union[UUID, None]:
         query = update(Product). \
-            where(and_(Product.product_id == product_id, Product.is_active == True)). \
+            where(Product.product_id == product_id). \
             values(kwargs). \
             returning(Product.product_id)
         res = await self.db_session.execute(query)

@@ -88,8 +88,8 @@ async def update_product_by_id(
     if product_for_update is None:
         raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found.")
 
-    if user_id != current_user.user_id:
+    if current_user.user_id != product_for_update.user_id:
         raise HTTPException(status_code=403, detail="Forbidden.")
          
-    updated_product_id = await _update_product(updated_product_params=updated_product_params, db=db, product_id=product_id)
+    updated_product_id = await _update_product(updated_product_params=updated_product_params, session=db, product_id=product_id)
     return UpdatedProductResponse(updated_product_id=updated_product_id)

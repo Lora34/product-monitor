@@ -144,7 +144,7 @@ class UpdatedProductResponse(BaseModel):
 class UpdateProductRequest(BaseModel):
     name: Optional[str]
     description: Optional[str]
-    link_to_product: Optional[EmailStr]
+    link_to_product: Optional[str]
     logo: Optional[str]
     about: Optional[str]
     problem: Optional[str]
@@ -152,11 +152,3 @@ class UpdateProductRequest(BaseModel):
     advantages: Optional[str]
     additional: Optional[str]
     link: Optional[str]
-
-    @field_validator("name")
-    def validate_name(cls, value):
-        if not LETTER_MATCH_PATTERN.match(value):
-            raise HTTPException(
-                status_code=422, detail="Name should contains only letters"
-            )
-        return value
