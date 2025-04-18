@@ -147,4 +147,14 @@ class ProductDAL:
         update_product_id_row = res.fetchone()
         if update_product_id_row is not None:
             return update_product_id_row[0]
+
+    async def delete_product(self, product_id: UUID) -> Union[UUID, None]:
+        query = update(Product).\
+            where(and_(Product.product_id == product_id)).\
+            values(is_active=False).\
+            returning(Product.product_id)
+        res = await self.db_session.execute(query)
+        deleted_product_id_row = res.fetchone()
+        if deleted_product_id_row is not None:
+            return deleted_product_id_row[0]
     

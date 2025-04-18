@@ -2,11 +2,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.actions.product import _create_new_product, _get_product_by_id, _update_product
+from api.actions.product import _create_new_product, _delete_product, _get_product_by_id, _update_product
 from api.actions.user import check_user_permissions
 from api.actions.auth import get_current_user_from_token
 from api.actions.user import _create_new_user, _delete_user, _get_user_by_id, _update_user
-from api.models import ProductCreate, ShowProduct, UpdateProductRequest, UpdatedProductResponse, UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
+from api.models import DeleteProductResponse, ProductCreate, ShowProduct, UpdateProductRequest, UpdatedProductResponse, UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
 from db.models import User
 from db.session import get_db
 
@@ -76,7 +76,6 @@ async def create_product(body: ProductCreate, db: AsyncSession = Depends(get_db)
 @product_router.patch("/", response_model=UpdatedProductResponse)
 async def update_product_by_id(
         product_id: UUID, 
-        user_id: UUID,
         body: UpdateProductRequest, 
         db: AsyncSession = Depends(get_db),
         current_user: User = Depends(get_current_user_from_token)
@@ -100,3 +99,24 @@ async def get_product_by_id(product_id: UUID, db: AsyncSession = Depends(get_db)
     if product is None:
         raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found.")
     return product
+
+@product_router.delete("/", response_model=DeleteProductResponse)
+async def delete_product(
+    product_id: UUID, 
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token)
+    ) -> DeleteProductResponse:
+
+    product_for_deletion = await _get_product_by_id(product_id, db)
+    if product_for_deletion is None:
+        raise HTTPException(
+            status_code=404, detail=f"Product with id {product_id} not found."
+        )
+    if current_user.user_id != product_for_deletion.user_id:
+        raise HTTPException(status_code=403, detail="Forbidden.")
+    
+    deleted_product_id = await _delete_product(product_id, db)
+    if deleted_product_id is None:
+        raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found.")
+    
+    return DeleteProductResponse(deleted_product_id=deleted_product_id)

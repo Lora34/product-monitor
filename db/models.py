@@ -58,6 +58,7 @@ class Product(Base):
 
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.user_id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="products")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=True)
 
     name: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)

@@ -152,3 +152,6 @@ class UpdateProductRequest(BaseModel):
     advantages: Optional[str]
     additional: Optional[str]
     link: Optional[str]
+
+class DeleteProductResponse(BaseModel):
+    deleted_product_id: uuid.UUID

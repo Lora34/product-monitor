@@ -68,3 +68,11 @@ async def _update_product(updated_product_params: dict, product_id: UUID, sessio
             **updated_product_params
         )
         return updated_product_id
+
+async def _delete_product(product_id, session) -> Union[UUID, None]:
+    async with session.begin():
+        product_dal = ProductDAL(session)
+        deleted_product_id = await product_dal.delete_product(
+            product_id=product_id,
+        )
+        return deleted_product_id
