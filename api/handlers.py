@@ -93,3 +93,10 @@ async def update_product_by_id(
          
     updated_product_id = await _update_product(updated_product_params=updated_product_params, session=db, product_id=product_id)
     return UpdatedProductResponse(updated_product_id=updated_product_id)
+
+@product_router.get("/", response_model=ShowProduct)
+async def get_product_by_id(product_id: UUID, db: AsyncSession = Depends(get_db)) -> ShowProduct:
+    product = await _get_product_by_id(product_id, db)
+    if product is None:
+        raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found.")
+    return product

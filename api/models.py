@@ -105,7 +105,7 @@ class Token(BaseModel):
 ### Product ###
 class ShowProduct(TunedModel):
     product_id: uuid.UUID
-    user_id: str
+    user_id: uuid.UUID
     name: str 
     description: str 
     link_to_product: str 
@@ -119,7 +119,7 @@ class ShowProduct(TunedModel):
     link: str
     #born_date: date
     #post_date: date
-    pictures: str
+    #pictures: str
 
 class ProductCreate(BaseModel):
     user_id: str
