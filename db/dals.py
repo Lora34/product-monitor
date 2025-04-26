@@ -5,7 +5,7 @@ from enum import Enum
 from sqlalchemy import update, and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import Product, User
+from db.models import Image, Product, User
 
 ###########################################################
 # BLOCK FOR INTERACTION WITH DATABASE IN BUSINESS CONTEXT #
@@ -157,4 +157,18 @@ class ProductDAL:
         deleted_product_id_row = res.fetchone()
         if deleted_product_id_row is not None:
             return deleted_product_id_row[0]
+        
+class ImageDAL:
+    def __init__(self, db_session: AsyncSession):
+        self.db_session = db_session
+
+    async def create_image(self, path: str, product_id: int) -> Image:
+        new_image = Image(path=path, product_id=product_id)
+        self.db_session.add(new_image)
+        await self.db_session.flush()  
+        return new_image
+    
+    async def get_images_by_product(self, product_id: int) -> list[Image]:
+        result = await self.session.execute(select(Image).where(Image.product_id == product_id))
+        return result.scalars().all()
     

@@ -1,5 +1,6 @@
 """File with settings and configs for the project"""
 
+from pathlib import Path
 from envparse import Env
 
 env = Env()
@@ -17,3 +18,6 @@ TEST_DATABASE_URL = env.str(
 SECRET_KEY: str = env.str("SECRET_KEY", default="secret_key")
 ALGORITHM: str = env.str("ALGORITHM", default="HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES: int = env.int("ACCESS_TOKEN_EXPIRE_MINUTES", default=30)
+
+UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR.mkdir(exist_ok=True)  # создаст папку, если её нет

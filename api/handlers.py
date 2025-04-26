@@ -1,14 +1,23 @@
+from datetime import datetime
+import os
+from typing import List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.actions.product import _create_new_product, _delete_product, _get_product_by_id, _update_product
 from api.actions.user import check_user_permissions
 from api.actions.auth import get_current_user_from_token
 from api.actions.user import _create_new_user, _delete_user, _get_user_by_id, _update_user
 from api.models import DeleteProductResponse, ProductCreate, ShowProduct, UpdateProductRequest, UpdatedProductResponse, UserCreate, ShowUser, DeleteUserResponse, UpdateUserRequest, UpdatedUserResponse
-from db.models import User
+from db.dals import ImageDAL
+from db.models import Image, User
 from db.session import get_db
+import shutil
+from pathlib import Path
+
+from settings import UPLOAD_DIR
 
 user_router = APIRouter()
 product_router = APIRouter()
@@ -120,3 +129,62 @@ async def delete_product(
         raise HTTPException(status_code=404, detail=f"Product with id {product_id} not found.")
     
     return DeleteProductResponse(deleted_product_id=deleted_product_id)
+
+
+## Сохранение изображений ##
+
+async def generate_product_image_filename(product_id: str, extension="png"):
+    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    return f"{product_id}_{timestamp}.{extension}"
+
+ 
+@product_router.post("/upload-logo/")
+async def upload_image(
+    product_id: str, 
+    images: List[UploadFile] = File(...),
+    db_session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
+
+):
+    dal = ImageDAL(db_session)
+    uploaded = []
+
+    for image in images:
+        filename = await generate_product_image_filename(product_id)
+        file_path = UPLOAD_DIR / filename
+        with open(file_path, "wb") as f:
+            f.write(await image.read())
+
+        image = await dal.create_image(path=file_path, product_id=product_id)
+        uploaded.append(image.path)
+
+    return {"uploaded_files": uploaded, "message": "Изображения успешно загружено"}
+
+@product_router.delete("/images/{image_id}")
+async def delete_image(
+    image_id: int,
+    db_session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user_from_token),
+):
+    # 1. Получаем изображение
+    result = await db_session.execute(select(Image).where(Image.id == image_id))
+    image = result.scalar_one_or_none()
+
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+
+    # 2. Проверяем владельца
+    if image.product_id not in current_user.products:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this image")
+    
+    # 3. Удаляем файл с диска (если он существует)
+    try:
+        os.remove(image.path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при удалении файла: {str(e)}")
+
+    # 4. Удаляем запись из БД
+    await db_session.execute(delete(Image).where(Image.id == image_id))
+    await db_session.commit()
+
+    return {"message": "Файл успешно удалён"}

@@ -55,11 +55,9 @@ class Product(Base):
     __tablename__ = "products"
 
     product_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-
     user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.user_id"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="products")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=True)
-
     name: Mapped[str] = mapped_column(String, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     link_to_product: Mapped[str] = mapped_column(String, nullable=True)
@@ -76,6 +74,7 @@ class Product(Base):
     born_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
     post_date: Mapped[datetime.date] = mapped_column(Date, nullable=True)
     pictures = Column(ARRAY(String), nullable=True) #Галерея - массив изображений продукта
+    images: Mapped[list["Image"]] = relationship(back_populates="product")
     #audience: Mapped[int] = mapped_column(Integer, nullable=True)
 
     #__table_args__ = (
@@ -91,3 +90,12 @@ class Category(Base):
     name: Mapped[int] = mapped_column(Integer, nullable=False)   
     #product_id: Mapped[int] = mapped_column(ForeignKey("products.product_id"))
     #author: Mapped[User] = relationship(back_populates="posts")
+
+class Image(Base):
+    __tablename__ = "images"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    path: Mapped[str] = mapped_column(nullable=False)
+    product_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("products.product_id"), nullable=True)
+
+    product: Mapped["Product"] = relationship(back_populates="images")
